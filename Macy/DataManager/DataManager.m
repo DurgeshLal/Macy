@@ -21,11 +21,18 @@
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/plain"];
     NSDictionary *parameter = @{@"sf" : string};
     [manager GET:BASE_URL parameters:parameter success:^(NSURLSessionDataTask *task, id responseData) {
-        NSDictionary *dataDict = ((NSDictionary *)responseData[0]);
-        iHandler([(NSArray *)dataDict[@"lfs"] mutableCopy]);
+        
+        // ((NSArray *)responseData).count is to check if array count is greater than 0;
+        if (responseData && ((NSArray *)responseData).count > 0) {
+            NSDictionary *dataDict = ((NSDictionary *)responseData[0]);
+            iHandler([(NSArray *)dataDict[@"lfs"] mutableCopy], nil);
+        }else{
+            iHandler (nil, nil);
+        }
         
     } failure:^(NSURLSessionDataTask *task, NSError *error){
         NSLog(@"Error %@",error);
+        iHandler (nil, error);
     }];
 
     

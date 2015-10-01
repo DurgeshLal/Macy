@@ -11,6 +11,12 @@
 #import <MBProgressHUD.h>
 #import "DataManager.h"
 
+static NSString* const kOK = @"OK";
+static NSString* const kError = @"Error";
+static NSString* const kLoading = @"Loading";
+static NSString* const kReuseIdentifier = @"reuseID";
+static NSString* const kMessage = @"Text Filed Cann't be emply";
+
 @interface MACYAcronymListViewController ()<MBProgressHUDDelegate>
 @property (strong, nonatomic) IBOutlet UITextField *txtURL;
 @property (strong, nonatomic) IBOutlet UIBarButtonItem *btnGo;
@@ -38,7 +44,7 @@
             _activityIndicator = [[MBProgressHUD alloc] initWithView:self.navigationController.view];
             [self.navigationController.view addSubview:_activityIndicator];
             _activityIndicator.delegate = self;
-            _activityIndicator.labelText = @"Loading";
+            _activityIndicator.labelText = kLoading;
             _activityIndicator.square = YES;
         }
     return _activityIndicator;
@@ -50,13 +56,43 @@
     [self.activityIndicator show:YES];
     NSString *urlString  = self.txtURL.text;
     __weak MACYAcronymListViewController *weakSelf = self;
-    [DataManager fetchAcronymsForString:urlString withCompletionHandaler:^(id responseData) {
-        weakSelf.dataSourceArray = (NSMutableArray *)responseData;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.tableView reloadData];
-            [weakSelf.activityIndicator hide:YES];
-        });
+    [DataManager fetchAcronymsForString:urlString withCompletionHandaler:^(id responseData, NSError *error) {
+        if (responseData) {
+            weakSelf.dataSourceArray = (NSMutableArray *)responseData;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.tableView reloadData];
+                [weakSelf.activityIndicator hide:YES];
+            });
+        }else{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf handleError:error];
+                [weakSelf.activityIndicator hide:YES];
+            });
+            
+        }
     }];
+}
+
+-(void)handleError:(NSError *)error{
+   
+    UIAlertController * alert=   [UIAlertController
+                                  alertControllerWithTitle:kError
+                                  message:[error localizedDescription]
+                                  preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* ok = [UIAlertAction
+                         actionWithTitle:kOK
+                         style:UIAlertActionStyleDefault
+                         handler:^(UIAlertAction * action)
+                         {
+                             [alert dismissViewControllerAnimated:YES completion:nil];
+                             
+                         }];
+    
+    [alert addAction:ok];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+
 }
 
 -(void)addRefreshControl
@@ -98,7 +134,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    MACYAcronymListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"reuseID" forIndexPath:indexPath];
+    MACYAcronymListCell *cell = [tableView dequeueReusableCellWithIdentifier:kReuseIdentifier forIndexPath:indexPath];
     NSDictionary *dict = self.dataSourceArray[indexPath.row];
     [cell setDataWithDict:dict];
     
@@ -136,26 +172,71 @@
 
 - (IBAction)goButtonTapped:(id)sender
 {
-    [self.txtURL resignFirstResponder];
-    [self apiCall];
+    if ([self isValidText]) {
+        [self.txtURL resignFirstResponder];
+        [self apiCall];
+    }else{
+        [self requiredFieldError];
+    }
+    
 }
 
+-(BOOL)isValidText
+{
+    // There could be some other validations as well, like checking for special characters etc.
+    BOOL retValue = NO;
+    if ([self.txtURL.text isEqualToString:@""]) {
+        retValue = NO;
+    }else{
+        retValue = YES;
+    }
+    return retValue;
+}
+
+-(void)requiredFieldError{
+    UIAlertController * alert=   [UIAlertController
+                                  alertControllerWithTitle:kError
+                                  message:kMessage
+                                  preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* ok = [UIAlertAction
+                         actionWithTitle:kOK
+                         style:UIAlertActionStyleDefault
+                         handler:^(UIAlertAction * action)
+                         {
+                             [alert dismissViewControllerAnimated:YES completion:nil];
+                             
+                         }];
+    
+    [alert addAction:ok];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
 #pragma maek Update Table
 #pragma mark Private Method
 
 -(void)updateTable
 {
-    // update Table
     [self.activityIndicator show:YES];
     NSString *urlString  = self.txtURL.text;
     __weak MACYAcronymListViewController *weakSelf = self;
-    [DataManager fetchAcronymsForString:urlString withCompletionHandaler:^(id responseData) {
-        weakSelf.dataSourceArray = (NSMutableArray *)responseData;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.tableView reloadData];
-            [weakSelf.refreshControl endRefreshing];
-            [weakSelf.activityIndicator hide:YES];
-        });
+    [DataManager fetchAcronymsForString:urlString withCompletionHandaler:^(id responseData, NSError *error) {
+        if (responseData) {
+           
+            weakSelf.dataSourceArray = (NSMutableArray *)responseData;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.tableView reloadData];
+                [weakSelf.activityIndicator hide:YES];
+                [weakSelf.refreshControl endRefreshing];
+            });
+        }else{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf handleError:error];
+                [weakSelf.activityIndicator hide:YES];
+                [weakSelf.refreshControl endRefreshing];
+            });
+            
+        }
     }];
 }
 

@@ -6,9 +6,9 @@
 //  Copyright © 2015 Durgesh Gupta. All rights reserved.
 //
 
-typedef void(^CompletionHandler)(id responseData);
-#import <Foundation/Foundation.h>
 
+#import <Foundation/Foundation.h>
+typedef void(^CompletionHandler)(id responseData, NSError *error);
 
 @interface DataManager : NSObject
 

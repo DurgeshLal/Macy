@@ -8,7 +8,7 @@
 
 #import "DataManager.h"
 #import <AFNetworking.h>
-#define BASE_URL @"http://www.nactem.ac.uk/software/acromine/dictionary.py?sf="
+#define BASE_URL @"http://www.nactem.ac.uk/software/acromine/dictionary.py"
 
 
 @implementation DataManager
@@ -16,13 +16,11 @@
 
 + (void)fetchAcronymsForString:(NSString *)string withCompletionHandaler:(CompletionHandler)iHandler
 {
-    
-    NSString *urlString = [BASE_URL stringByAppendingString:string];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.responseSerializer = [AFJSONResponseSerializer serializer];
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/plain"];
-    
-    [manager GET:urlString parameters:nil success:^(NSURLSessionDataTask *task, id responseData) {
+    NSDictionary *parameter = @{@"sf" : string};
+    [manager GET:BASE_URL parameters:parameter success:^(NSURLSessionDataTask *task, id responseData) {
         NSDictionary *dataDict = ((NSDictionary *)responseData[0]);
         iHandler([(NSArray *)dataDict[@"lfs"] mutableCopy]);
         

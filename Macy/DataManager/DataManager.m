@@ -14,7 +14,8 @@
 @implementation DataManager
 
 
-+(void)fetchAcronymsForString:(NSString *)string withCompletionHandaler:(CompletionHandler)iHandler{
++ (void)fetchAcronymsForString:(NSString *)string withCompletionHandaler:(CompletionHandler)iHandler
+{
     
     NSString *urlString = [BASE_URL stringByAppendingString:string];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
@@ -29,7 +30,6 @@
         NSLog(@"Error %@",error);
     }];
 
-    
     
 }
 @end

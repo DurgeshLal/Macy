@@ -24,14 +24,16 @@
 
 // Lazy initialization
 
--(NSMutableArray *)dataSourceArray{
+-(NSMutableArray *)dataSourceArray
+{
     if (!_dataSourceArray) {
         _dataSourceArray = [[NSMutableArray alloc] init];
     }
     return _dataSourceArray;
 }
 
--(MBProgressHUD *)activityIndicator{
+-(MBProgressHUD *)activityIndicator
+{
     if (!_activityIndicator) {
             _activityIndicator = [[MBProgressHUD alloc] initWithView:self.navigationController.view];
             [self.navigationController.view addSubview:_activityIndicator];
@@ -43,7 +45,8 @@
 }
 #pragma mark API Call
 
--(void)apiCall{
+-(void)apiCall
+{
     [self.activityIndicator show:YES];
     NSString *urlString  = self.txtURL.text;
     __weak MACYAcronymListViewController *weakSelf = self;
@@ -56,21 +59,25 @@
     }];
 }
 
--(void)addRefreshControl{
+-(void)addRefreshControl
+{
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
     [refreshControl setTintColor:[UIColor magentaColor]];
     [refreshControl addTarget:self action:@selector(updateTable) forControlEvents:UIControlEventValueChanged];
     [self setRefreshControl:refreshControl];
 }
 
--(void)internalSetUP{
+-(void)internalSetUP
+{
     self.txtURL.text = @"FBI";
     [self addRefreshControl];
 }
--(void)awakeFromNib{
+-(void)awakeFromNib
+{
     [self internalSetUP];
 }
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     [self apiCall];
 }
@@ -78,15 +85,18 @@
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
     return self.dataSourceArray.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
     
     MACYAcronymListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"reuseID" forIndexPath:indexPath];
     NSDictionary *dict = self.dataSourceArray[indexPath.row];
@@ -97,14 +107,16 @@
 
 
 // Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
     // Return NO if you do not want the specified item to be editable.
     return YES;
 }
 
 
 // Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
         [self.dataSourceArray removeObjectAtIndex:indexPath.row];
@@ -114,14 +126,16 @@
 
 #pragma mark UITextFieldDelegate
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
     [textField resignFirstResponder];
     return YES;
 }
 
 #pragma mark IBAction
 
-- (IBAction)goButtonTapped:(id)sender {
+- (IBAction)goButtonTapped:(id)sender
+{
     [self.txtURL resignFirstResponder];
     [self apiCall];
 }
